@@ -18,200 +18,95 @@
             height: 100%;
             overflow: hidden;
             background-color: var(--water-deep);
-            font-family: 'Times New Roman', serif; /* 展現法式優雅 */
+            font-family: 'Times New Roman', serif;
         }
 
-     /* 空間背景層 */
-#space-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* 直接引用同層級的檔案名稱 */
-    background: url('./zen-bg.png') no-repeat center center; 
-    background-size: cover;
-    filter: saturate(0.8) brightness(0.9);
-    transition: filter 2s ease;
-}
-<!-- 在 <body> 標籤內加入人物容器 -->
-<div id="character-container">
-    <img src="char.png" id="main-character" alt="Cooling Sprite">
-</div>
+        /* 空間背景層 */
+        #space-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('./zen-bg.png') no-repeat center center; 
+            background-size: cover;
+            filter: saturate(0.8) brightness(0.9);
+            transition: filter 2s ease;
+            z-index: 1;
+        }
 
-<style>
-    #character-container {
-        position: absolute;
-        bottom: 15%; /* 讓他站在沙發附近的水面上 */
-        right: 20%;
-        width: 150px; /* 縮小成 Q 版尺寸 */
-        z-index: 100;
-        pointer-events: auto;
-        cursor: pointer;
-        transition: all 0.5s ease-out;
-    }
+        /* 角色圖層 */
+        #character-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
 
-    #main-character {
-        width: 100%;
-        /* 增加漂浮動畫 - 禪意的流動感 */
-        animation: floatAnime 4s ease-in-out infinite;
-        filter: drop-shadow(0 10px 15px rgba(0, 30, 60, 0.3));
-    }
+        .character-container {
+            position: absolute;
+            pointer-events: auto;
+            cursor: pointer;
+        }
 
-    @keyframes floatAnime {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
+        /* 方案 A: 泡泡角色 */
+        #char-bubble-wrap {
+            bottom: 25%;
+            left: 15%;
+            width: 180px;
+            animation: floatBubble 5s ease-in-out infinite;
+        }
 
-    /* 點擊時的小反饋 */
-    #character-container:active {
-        transform: scale(0.9);
-    }
-</style>
+        @keyframes floatBubble {
+            0%, 100% { transform: translateY(0) rotate(-1deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+        }
 
-<script>
-    // 簡單的點擊互動：讓小人物跳一下
-    const char = document.getElementById('character-container');
-    char.addEventListener('click', () => {
-        char.style.transform = 'translateY(-50px)';
-        setTimeout(() => {
-            char.style.transform = 'translateY(0)';
-        }, 300);
-        // 觸發一個水波紋
-        ripples.push(new Ripple(window.innerWidth * 0.8, window.innerHeight * 0.85));
-    });
-</script>
+        /* 方案 B: 水面角色 */
+        #char-floor-wrap {
+            bottom: 12%;
+            right: 18%;
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: waterSway 8s ease-in-out infinite;
+        }
 
-    <!-- 在 <body> 內的 UI Layer 之前加入角色層 -->
-<div id="character-layer">
-    <!-- 方案 A: 坐在泡泡上 (漂浮感) -->
-    <div id="char-bubble-wrap" class="character-container">
-        <img src="charbubble.png" alt="Bubble Sprite">
-    </div>
+        .char-main {
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            -webkit-mask-image: linear-gradient(to bottom, black 85%, rgba(0,0,0,0.5) 100%);
+            mask-image: linear-gradient(to bottom, black 85%, rgba(0,0,0,0.5) 100%);
+        }
 
-    <!-- 方案 B: 坐在水面上 (融合感) -->
-    <div id="char-floor-wrap" class="character-container">
-        <!-- 角色本體 -->
-        <img src="charfloor.png" class="char-main" alt="Floor Sprite">
-        <!-- 倒影：增加禪意深度的關鍵 -->
-        <img src="charfloor.png" class="char-reflection" alt="Reflection">
-    </div>
-</div>
+        .char-reflection {
+            width: 100%;
+            transform: scaleY(-0.8) translateY(-10px);
+            filter: blur(4px) brightness(0.5) opacity(0.4);
+            margin-top: -5px;
+            z-index: 1;
+        }
 
-<style>
-    /* 角色圖層定位 */
-    #character-layer {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        pointer-events: none;
-        z-index: 5; /* 位於背景之上，水波紋之下 */
-    }
+        @keyframes waterSway {
+            0%, 100% { transform: translateX(0) rotate(0.5deg); }
+            50% { transform: translateX(5px) rotate(-0.5deg); }
+        }
 
-    .character-container {
-        position: absolute;
-        pointer-events: auto;
-        cursor: pointer;
-    }
-
-    /* --- 方案 A: CharBubble 邏輯 (金/氣) --- */
-    #char-bubble-wrap {
-        bottom: 25%;
-        left: 15%;
-        width: 180px;
-        animation: floatBubble 5s ease-in-out infinite;
-    }
-
-    @keyframes floatBubble {
-        0%, 100% { transform: translateY(0) rotate(-1deg); }
-        50% { transform: translateY(-20px) rotate(1deg); }
-    }
-
-    /* --- 方案 B: CharFloor 邏輯 (水/融合) --- */
-    #char-floor-wrap {
-        bottom: 12%; /* 調整高度使其接觸水面 */
-        right: 18%;
-        width: 160px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    /* 角色本體：底端微縮，模擬入水 */
-    .char-main {
-        width: 100%;
-        position: relative;
-        z-index: 2;
-        /* 使用遮罩讓底部稍微變淡，模擬與水面接觸的霧氣感 */
-        -webkit-mask-image: linear-gradient(to bottom, black 85%, rgba(0,0,0,0.5) 100%);
-        mask-image: linear-gradient(to bottom, black 85%, rgba(0,0,0,0.5) 100%);
-    }
-
-    /* 倒影：關鍵降溫細節 */
-    .char-reflection {
-        width: 100%;
-        transform: scaleY(-0.8) translateY(-10px); /* 垂直翻轉並縮小 */
-        filter: blur(4px) brightness(0.5) opacity(0.4); /* 模糊、變暗、半透明 */
-        margin-top: -5px;
-        z-index: 1;
-    }
-
-    /* 微動動畫：模擬水面的細微擺動 */
-    #char-floor-wrap {
-        animation: waterSway 8s ease-in-out infinite;
-    }
-
-    @keyframes waterSway {
-        0%, 100% { transform: translateX(0) rotate(0.5deg); }
-        50% { transform: translateX(5px) rotate(-0.5deg); }
-    }
-</style>
-const bubbleChar = document.getElementById('char-bubble-wrap');
-const floorChar = document.getElementById('char-floor-wrap');
-
-// 點擊泡泡角色：向上彈跳並產生輕盈水波
-bubbleChar.addEventListener('click', (e) => {
-    bubbleChar.style.transition = 'transform 0.3s ease-out';
-    bubbleChar.style.transform = 'translateY(-100px) scale(1.1)';
-    
-    // 產生水波 (五行：水)
-    for(let i=0; i<3; i++) {
-        setTimeout(() => {
-            ripples.push(new Ripple(e.clientX, e.clientY + 50));
-        }, i * 200);
-    }
-
-    setTimeout(() => {
-        bubbleChar.style.transform = 'translateY(0) scale(1)';
-    }, 600);
-});
-
-// 點擊地面角色：產生向外擴散的深沉漣漪
-floorChar.addEventListener('click', (e) => {
-    // 視覺降溫反饋：畫面暫時變冷
-    const bg = document.getElementById('space-background');
-    bg.style.filter = "saturate(0.2) brightness(0.7) contrast(1.1)";
-    
-    // 產生多重漣漪
-    ripples.push(new Ripple(e.clientX, e.clientY));
-    
-    setTimeout(() => {
-        bg.style.filter = isDeep ? "saturate(0) brightness(0.6)" : "saturate(0.8) brightness(0.9)";
-    }, 1000);
-});
-    
         /* 水波紋畫布層 */
         #ripple-canvas {
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 2;
+            z-index: 2; /* 放在背景之上，UI 之下 */
             cursor: crosshair;
         }
 
-        /* UI 界面層 - 「金」的精確 */
+        /* UI 界面層 */
         #ui-layer {
             position: absolute;
             top: 0;
@@ -219,7 +114,7 @@ floorChar.addEventListener('click', (e) => {
             width: 100%;
             height: 100%;
             z-index: 10;
-            pointer-events: none; /* 讓點擊穿透到畫布 */
+            pointer-events: none;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -239,13 +134,13 @@ floorChar.addEventListener('click', (e) => {
 
         .footer {
             display: flex;
-            justify-content: b;
+            justify-content: space-between;
+            align-items: center;
             color: var(--metal-silver);
             font-size: 12px;
             letter-spacing: 2px;
         }
 
-        /* 降溫按鈕 */
         .cool-down-btn {
             pointer-events: auto;
             border: 1px solid var(--metal-silver);
@@ -261,13 +156,26 @@ floorChar.addEventListener('click', (e) => {
             background: var(--metal-silver);
             color: var(--water-deep);
         }
-
     </style>
 </head>
 <body>
 
     <div id="space-background"></div>
+    
     <canvas id="ripple-canvas"></canvas>
+
+    <div id="character-layer">
+        <!-- 方案 A -->
+        <div id="char-bubble-wrap" class="character-container">
+            <img src="charbubble.png" alt="Bubble Sprite" style="width:100%">
+        </div>
+
+        <!-- 方案 B -->
+        <div id="char-floor-wrap" class="character-container">
+            <img src="charfloor.png" class="char-main" alt="Floor Sprite">
+            <img src="charfloor.png" class="char-reflection" alt="Reflection">
+        </div>
+    </div>
 
     <div id="ui-layer">
         <div class="header">
@@ -284,8 +192,14 @@ floorChar.addEventListener('click', (e) => {
     <script>
         const canvas = document.getElementById('ripple-canvas');
         const ctx = canvas.getContext('2d');
+        const bg = document.getElementById('space-background');
+        const statusText = document.getElementById('status');
+        const bubbleChar = document.getElementById('char-bubble-wrap');
+        const floorChar = document.getElementById('char-floor-wrap');
+
         let width, height;
         let ripples = [];
+        let isDeep = false;
 
         function init() {
             width = canvas.width = window.innerWidth;
@@ -330,28 +244,48 @@ floorChar.addEventListener('click', (e) => {
             requestAnimationFrame(animate);
         }
 
-        // 觸碰產生水波 - 「水」的交互
+        // 畫布點擊產生波紋
         window.addEventListener('mousedown', (e) => {
             ripples.push(new Ripple(e.clientX, e.clientY));
         });
 
-        window.addEventListener('touchstart', (e) => {
-            const touch = e.touches[0];
-            ripples.push(new Ripple(touch.clientX, touch.clientY));
+        // 點擊角色 A (向上彈跳)
+        bubbleChar.addEventListener('click', (e) => {
+            e.stopPropagation(); // 防止觸發畫布的點擊
+            bubbleChar.style.transition = 'transform 0.3s ease-out';
+            bubbleChar.style.transform = 'translateY(-100px) scale(1.1)';
+            
+            for(let i=0; i<3; i++) {
+                setTimeout(() => {
+                    ripples.push(new Ripple(e.clientX, e.clientY));
+                }, i * 200);
+            }
+
+            setTimeout(() => {
+                bubbleChar.style.transform = 'translateY(0) scale(1)';
+            }, 600);
         });
 
-        // 視覺降溫切換功能
-        let isDeep = false;
+        // 點擊角色 B (畫面變冷)
+        floorChar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            bg.style.filter = "saturate(0.2) brightness(0.7) contrast(1.1)";
+            ripples.push(new Ripple(e.clientX, e.clientY));
+            
+            setTimeout(() => {
+                bg.style.filter = isDeep ? "saturate(0) brightness(0.6)" : "saturate(0.8) brightness(0.9)";
+            }, 1000);
+        });
+
+        // 降溫按鈕功能
         function toggleCooling() {
-            const bg = document.getElementById('space-background');
-            const status = document.getElementById('status');
             if(!isDeep) {
-                bg.style.filter = "saturate(0) brightness(0.6) blue-shift(10deg)";
-                status.innerText = "STATUS: DEEP ZEN";
+                bg.style.filter = "saturate(0) brightness(0.6) hue-rotate(10deg)";
+                statusText.innerText = "STATUS: DEEP ZEN";
                 isDeep = true;
             } else {
                 bg.style.filter = "saturate(0.8) brightness(0.9)";
-                status.innerText = "STATUS: COOLING...";
+                statusText.innerText = "STATUS: COOLING...";
                 isDeep = false;
             }
         }
