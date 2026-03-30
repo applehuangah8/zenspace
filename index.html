@@ -81,6 +81,126 @@
         ripples.push(new Ripple(window.innerWidth * 0.8, window.innerHeight * 0.85));
     });
 </script>
+
+    <!-- 在 <body> 內的 UI Layer 之前加入角色層 -->
+<div id="character-layer">
+    <!-- 方案 A: 坐在泡泡上 (漂浮感) -->
+    <div id="char-bubble-wrap" class="character-container">
+        <img src="charbubble.png" alt="Bubble Sprite">
+    </div>
+
+    <!-- 方案 B: 坐在水面上 (融合感) -->
+    <div id="char-floor-wrap" class="character-container">
+        <!-- 角色本體 -->
+        <img src="charfloor.png" class="char-main" alt="Floor Sprite">
+        <!-- 倒影：增加禪意深度的關鍵 -->
+        <img src="charfloor.png" class="char-reflection" alt="Reflection">
+    </div>
+</div>
+
+<style>
+    /* 角色圖層定位 */
+    #character-layer {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 5; /* 位於背景之上，水波紋之下 */
+    }
+
+    .character-container {
+        position: absolute;
+        pointer-events: auto;
+        cursor: pointer;
+    }
+
+    /* --- 方案 A: CharBubble 邏輯 (金/氣) --- */
+    #char-bubble-wrap {
+        bottom: 25%;
+        left: 15%;
+        width: 180px;
+        animation: floatBubble 5s ease-in-out infinite;
+    }
+
+    @keyframes floatBubble {
+        0%, 100% { transform: translateY(0) rotate(-1deg); }
+        50% { transform: translateY(-20px) rotate(1deg); }
+    }
+
+    /* --- 方案 B: CharFloor 邏輯 (水/融合) --- */
+    #char-floor-wrap {
+        bottom: 12%; /* 調整高度使其接觸水面 */
+        right: 18%;
+        width: 160px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* 角色本體：底端微縮，模擬入水 */
+    .char-main {
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        /* 使用遮罩讓底部稍微變淡，模擬與水面接觸的霧氣感 */
+        -webkit-mask-image: linear-gradient(to bottom, black 85%, rgba(0,0,0,0.5) 100%);
+        mask-image: linear-gradient(to bottom, black 85%, rgba(0,0,0,0.5) 100%);
+    }
+
+    /* 倒影：關鍵降溫細節 */
+    .char-reflection {
+        width: 100%;
+        transform: scaleY(-0.8) translateY(-10px); /* 垂直翻轉並縮小 */
+        filter: blur(4px) brightness(0.5) opacity(0.4); /* 模糊、變暗、半透明 */
+        margin-top: -5px;
+        z-index: 1;
+    }
+
+    /* 微動動畫：模擬水面的細微擺動 */
+    #char-floor-wrap {
+        animation: waterSway 8s ease-in-out infinite;
+    }
+
+    @keyframes waterSway {
+        0%, 100% { transform: translateX(0) rotate(0.5deg); }
+        50% { transform: translateX(5px) rotate(-0.5deg); }
+    }
+</style>
+const bubbleChar = document.getElementById('char-bubble-wrap');
+const floorChar = document.getElementById('char-floor-wrap');
+
+// 點擊泡泡角色：向上彈跳並產生輕盈水波
+bubbleChar.addEventListener('click', (e) => {
+    bubbleChar.style.transition = 'transform 0.3s ease-out';
+    bubbleChar.style.transform = 'translateY(-100px) scale(1.1)';
+    
+    // 產生水波 (五行：水)
+    for(let i=0; i<3; i++) {
+        setTimeout(() => {
+            ripples.push(new Ripple(e.clientX, e.clientY + 50));
+        }, i * 200);
+    }
+
+    setTimeout(() => {
+        bubbleChar.style.transform = 'translateY(0) scale(1)';
+    }, 600);
+});
+
+// 點擊地面角色：產生向外擴散的深沉漣漪
+floorChar.addEventListener('click', (e) => {
+    // 視覺降溫反饋：畫面暫時變冷
+    const bg = document.getElementById('space-background');
+    bg.style.filter = "saturate(0.2) brightness(0.7) contrast(1.1)";
+    
+    // 產生多重漣漪
+    ripples.push(new Ripple(e.clientX, e.clientY));
+    
+    setTimeout(() => {
+        bg.style.filter = isDeep ? "saturate(0) brightness(0.6)" : "saturate(0.8) brightness(0.9)";
+    }, 1000);
+});
     
         /* 水波紋畫布層 */
         #ripple-canvas {
