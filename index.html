@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>水鏡廊苑 - Visual Cooling Experience</title>
+    <style>
+        :root {
+            --metal-silver: #d1d1d1;
+            --water-deep: #0a0f14;
+            --zen-white: #f5f5f5;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--water-deep);
+            font-family: 'Times New Roman', serif; /* 展現法式優雅 */
+        }
+
+     /* 空間背景層 */
+#space-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* 直接引用同層級的檔案名稱 */
+    background: url('./zen-bg.png') no-repeat center center; 
+    background-size: cover;
+    filter: saturate(0.8) brightness(0.9);
+    transition: filter 2s ease;
+}
+
+        /* 水波紋畫布層 */
+        #ripple-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            cursor: crosshair;
+        }
+
+        /* UI 界面層 - 「金」的精確 */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none; /* 讓點擊穿透到畫布 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            border-left: 1px solid var(--metal-silver);
+            padding-left: 15px;
+            color: var(--metal-silver);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-size: 14px;
+            pointer-events: auto;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: b;
+            color: var(--metal-silver);
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        /* 降溫按鈕 */
+        .cool-down-btn {
+            pointer-events: auto;
+            border: 1px solid var(--metal-silver);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--metal-silver);
+            padding: 10px 25px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.5s;
+        }
+
+        .cool-down-btn:hover {
+            background: var(--metal-silver);
+            color: var(--water-deep);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="space-background"></div>
+    <canvas id="ripple-canvas"></canvas>
+
+    <div id="ui-layer">
+        <div class="header">
+            <div>L'ÉCHELLE DE LA SÉRÉNITÉ</div>
+            <div style="font-size: 10px; opacity: 0.6;">ZENITH FRENCH MODERNISM</div>
+        </div>
+
+        <div class="footer">
+            <div id="status">STATUS: COOLING...</div>
+            <button class="cool-down-btn" onclick="toggleCooling()">DEEP MEDITATION</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('ripple-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let ripples = [];
+
+        function init() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', init);
+        init();
+
+        class Ripple {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 0;
+                this.maxRadius = 150;
+                this.opacity = 0.5;
+                this.speed = 1.5;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(200, 210, 220, ${this.opacity})`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.closePath();
+            }
+
+            update() {
+                this.radius += this.speed;
+                this.opacity -= 0.005;
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            ripples = ripples.filter(r => r.opacity > 0);
+            ripples.forEach(r => {
+                r.update();
+                r.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // 觸碰產生水波 - 「水」的交互
+        window.addEventListener('mousedown', (e) => {
+            ripples.push(new Ripple(e.clientX, e.clientY));
+        });
+
+        window.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            ripples.push(new Ripple(touch.clientX, touch.clientY));
+        });
+
+        // 視覺降溫切換功能
+        let isDeep = false;
+        function toggleCooling() {
+            const bg = document.getElementById('space-background');
+            const status = document.getElementById('status');
+            if(!isDeep) {
+                bg.style.filter = "saturate(0) brightness(0.6) blue-shift(10deg)";
+                status.innerText = "STATUS: DEEP ZEN";
+                isDeep = true;
+            } else {
+                bg.style.filter = "saturate(0.8) brightness(0.9)";
+                status.innerText = "STATUS: COOLING...";
+                isDeep = false;
+            }
+        }
+
+        animate();
+    </script>
+</body>
+</html>
