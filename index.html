@@ -34,7 +34,54 @@
     filter: saturate(0.8) brightness(0.9);
     transition: filter 2s ease;
 }
+<!-- 在 <body> 標籤內加入人物容器 -->
+<div id="character-container">
+    <img src="char.png" id="main-character" alt="Cooling Sprite">
+</div>
 
+<style>
+    #character-container {
+        position: absolute;
+        bottom: 15%; /* 讓他站在沙發附近的水面上 */
+        right: 20%;
+        width: 150px; /* 縮小成 Q 版尺寸 */
+        z-index: 100;
+        pointer-events: auto;
+        cursor: pointer;
+        transition: all 0.5s ease-out;
+    }
+
+    #main-character {
+        width: 100%;
+        /* 增加漂浮動畫 - 禪意的流動感 */
+        animation: floatAnime 4s ease-in-out infinite;
+        filter: drop-shadow(0 10px 15px rgba(0, 30, 60, 0.3));
+    }
+
+    @keyframes floatAnime {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* 點擊時的小反饋 */
+    #character-container:active {
+        transform: scale(0.9);
+    }
+</style>
+
+<script>
+    // 簡單的點擊互動：讓小人物跳一下
+    const char = document.getElementById('character-container');
+    char.addEventListener('click', () => {
+        char.style.transform = 'translateY(-50px)';
+        setTimeout(() => {
+            char.style.transform = 'translateY(0)';
+        }, 300);
+        // 觸發一個水波紋
+        ripples.push(new Ripple(window.innerWidth * 0.8, window.innerHeight * 0.85));
+    });
+</script>
+    
         /* 水波紋畫布層 */
         #ripple-canvas {
             position: absolute;
