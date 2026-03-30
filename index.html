@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>心之水 - Visual Cooling Experience</title>
+    <title>心之水 - L'EAU DE L'ESPRIT</title>
     <style>
         :root {
             --metal-silver: #d1d1d1;
             --water-deep: #0a0f14;
             --zen-white: #f5f5f5;
-            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.12);
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background-color: var(--water-deep);
-            font-family: 'Times New Roman', "PingFang TC", "Microsoft JhengHei", serif;
+            font-family: 'Times New Roman', "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", serif;
         }
 
         #space-background {
@@ -36,7 +36,6 @@
             transition: transform 0.2s;
         }
 
-        /* 角色位置與動畫 */
         #char-center-wrap { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; z-index: 6; animation: breath 4s ease-in-out infinite; }
         #char-bubble-wrap { bottom: 25%; left: 10%; width: 150px; z-index: 6; animation: float 5s ease-in-out infinite; }
         #char-floor-wrap { bottom: 12%; right: 15%; width: 140px; display: flex; flex-direction: column; align-items: center; z-index: 6; animation: sway 8s ease-in-out infinite; }
@@ -48,40 +47,51 @@
         .char-main { width: 100%; -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); }
         .char-reflection { width: 100%; transform: scaleY(-0.8) translateY(-10px); filter: blur(4px) opacity(0.3); margin-top: -5px; }
 
-        /* --- 修改後：對話框樣式 (增加可移動手勢) --- */
+        /* --- 對話框樣式修正：支援長句子 --- */
         .dialogue-bubble {
             position: absolute;
             background: var(--glass-bg);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             color: #ffffff;
-            padding: 12px 40px 12px 18px;
-            border-radius: 8px;
-            font-size: 16px;
+            padding: 15px 45px 15px 20px; /* 增加內距 */
+            border-radius: 12px;
+            font-size: 15px;
+            line-height: 1.6; /* 增加行高讓多行文字好讀 */
             pointer-events: auto;
             z-index: 1000;
-            white-space: nowrap;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            cursor: move; /* 提示使用者可以移動 */
-            user-select: none; /* 防止移動時選取到文字 */
-            touch-action: none; /* 防止手機瀏覽器拖動時頁面滾動 */
-            /* 初始動畫 */
+            
+            /* 響應式核心：手機自動換行 */
+            min-width: 120px;
+            max-width: 280px; /* 手機端寬度限制 */
+            white-space: normal; /* 允許換行 */
+            word-wrap: break-word;
+            
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            cursor: move;
+            user-select: none;
+            touch-action: none;
             animation: popIn 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards;
         }
 
+        /* 針對較大螢幕微調寬度 */
+        @media (min-width: 768px) {
+            .dialogue-bubble { max-width: 400px; font-size: 16px; }
+        }
+
         @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.5); }
-            100% { opacity: 1; transform: scale(1); }
+            0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .close-btn {
-            position: absolute; top: 0; right: 0; width: 35px; height: 100%;
+            position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 20px; color: #fff; opacity: 0.6;
-            pointer-events: auto;
+            cursor: pointer; font-size: 22px; color: #fff; opacity: 0.5;
+            transition: 0.3s;
         }
-        .close-btn:hover { opacity: 1; color: #ff8888; }
+        .close-btn:hover { opacity: 1; color: #ffaaaa; }
 
         #ripple-canvas { position: absolute; top: 0; left: 0; z-index: 2; pointer-events: none; }
 
@@ -92,7 +102,7 @@
         }
         .header { border-left: 1px solid var(--metal-silver); padding-left: 15px; color: var(--metal-silver); pointer-events: auto; }
         .footer { display: flex; justify-content: space-between; align-items: center; color: var(--metal-silver); pointer-events: none; }
-        .cool-down-btn { pointer-events: auto; border: 1px solid var(--metal-silver); background: rgba(255, 255, 255, 0.05); color: var(--metal-silver); padding: 10px 25px; cursor: pointer; backdrop-filter: blur(5px); }
+        .cool-down-btn { pointer-events: auto; border: 1px solid var(--metal-silver); background: rgba(255, 255, 255, 0.05); color: var(--metal-silver); padding: 10px 25px; cursor: pointer; backdrop-filter: blur(5px); transition: 0.5s; }
     </style>
 </head>
 <body>
@@ -111,12 +121,12 @@
 
     <div id="ui-layer">
         <div class="header">
-            <div>L'ÉCHELLE DE LA SÉRÉNITÉ</div>
-            <div style="font-size: 10px; opacity: 0.6;">ZENITH FRENCH MODERNISM</div>
+            <div style="font-size: 18px; letter-spacing: 6px;">心之水</div>
+            <div style="font-size: 10px; opacity: 0.6; letter-spacing: 2px;">L'EAU DE L'ESPRIT</div>
         </div>
         <div class="footer">
-            <div id="status">STATUS: COOLING...</div>
-            <button class="cool-down-btn" onclick="toggleCooling()">DEEP MEDITATION</button>
+            <div id="status">STATUS: CLEARING...</div>
+            <button class="cool-down-btn" onclick="toggleCooling()">DEEP ZEN</button>
         </div>
     </div>
 
@@ -125,14 +135,17 @@
         const ctx = canvas.getContext('2d');
         const bg = document.getElementById('space-background');
         
+        // 更新後的禪意語錄
         const phrases = [
             "即慧之時定在慧，即定之時慧在定。",
             "法性寂然為止，寂而常照為觀，止如明鏡止水，觀如影現萬象，故止與觀者，不二一體也。",
             "心隨萬境轉，轉處實能幽，隨流認得性，無喜亦無憂。",
             "前念不生即心，後念不滅即佛；成一切相即心，離一切相即佛。",
             "靜慮能生智，定復從智生，佛果大菩提，定慧為根本。",
-            "猿抱兒歸青嶂後，鳥啣花落碧巖前。",
-            "覺光常在"
+            "猿抱子歸青嶂裡，鳥啣花落碧巖前。",
+            "覺光常在",
+            "選得幽居愜野情，終年無送亦無迎。有時直上孤峰頂，月下披雲嘯一聲。",
+            "桶底脫時大地闊，命根斷處碧潭清。好將一點紅爐雪，散作人間照夜燈。"
         ];
 
         let width, height, ripples = [], isDeep = false;
@@ -144,34 +157,27 @@
         window.addEventListener('resize', init);
         init();
 
-        // --- 拖拽功能邏輯 ---
+        // 拖拽功能邏輯 (支援移動端)
         function makeDraggable(el) {
             let isDragging = false;
             let startX, startY, initialLeft, initialTop;
 
             el.addEventListener('pointerdown', (e) => {
-                // 如果點到的是叉叉，不觸發拖拽
                 if (e.target.classList.contains('close-btn')) return;
-
                 isDragging = true;
-                el.style.zIndex = 2000; // 拖動時置頂
-                
-                // 紀錄初始位置
+                el.style.zIndex = 2000;
                 startX = e.clientX;
                 startY = e.clientY;
                 initialLeft = el.offsetLeft;
                 initialTop = el.offsetTop;
-
-                el.setPointerCapture(e.pointerId); // 鎖定指針
+                el.setPointerCapture(e.pointerId);
                 e.stopPropagation();
             });
 
             el.addEventListener('pointermove', (e) => {
                 if (!isDragging) return;
-
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
-
                 el.style.left = `${initialLeft + dx}px`;
                 el.style.top = `${initialTop + dy}px`;
             });
@@ -183,27 +189,29 @@
             });
         }
 
-        // 建立對話框函式
+        // 建立對話框
         function createDialogue(x, y) {
             const bubble = document.createElement('div');
             bubble.className = 'dialogue-bubble';
             const text = phrases[Math.floor(Math.random() * phrases.length)];
             bubble.innerHTML = `<span>${text}</span><div class="close-btn">×</div>`;
             
-            // 初始生成位置（稍作調整避免重疊）
-            bubble.style.left = (x - 50) + "px";
-            bubble.style.top = (y - 80) + "px";
+            // 初始位置設定 (根據螢幕寬度自動偏移，避免過於靠右)
+            let spawnX = x - 100;
+            if (spawnX + 280 > window.innerWidth) spawnX = window.innerWidth - 300;
+            if (spawnX < 20) spawnX = 20;
 
-            // 關閉邏輯
+            bubble.style.left = spawnX + "px";
+            bubble.style.top = (y - 120) + "px";
+
             bubble.querySelector('.close-btn').onclick = (e) => {
                 e.stopPropagation();
                 bubble.style.opacity = '0';
+                bubble.style.transform = 'scale(0.8)';
                 setTimeout(() => bubble.remove(), 300);
             };
 
             document.body.appendChild(bubble);
-            
-            // 使其可拖拽
             makeDraggable(bubble);
         }
 
@@ -228,23 +236,19 @@
             requestAnimationFrame(animate);
         }
 
-        // 背景點擊
         window.addEventListener('pointerdown', (e) => {
             if (e.target.closest('.character-container') || e.target.closest('.dialogue-bubble') || e.target.tagName === 'BUTTON') return;
             ripples.push(new Ripple(e.clientX, e.clientY));
         });
 
-        // 角色點擊
         document.querySelectorAll('.character-container').forEach(char => {
             char.addEventListener('pointerdown', (e) => {
                 e.stopPropagation();
                 const rect = char.getBoundingClientRect();
                 const cx = rect.left + rect.width / 2;
                 const cy = rect.top + rect.height / 2;
-
                 ripples.push(new Ripple(cx, cy, 250));
                 createDialogue(cx, rect.top);
-
                 char.style.transform = "scale(0.9)";
                 setTimeout(() => char.style.transform = "", 200);
             });
@@ -254,11 +258,11 @@
             isDeep = !isDeep;
             const statusText = document.getElementById('status');
             if(isDeep) {
-                bg.style.filter = "saturate(0) brightness(0.5) hue-rotate(20deg)";
+                bg.style.filter = "saturate(0) brightness(0.4) hue-rotate(15deg) contrast(1.1)";
                 statusText.innerText = "STATUS: DEEP ZEN";
             } else {
                 bg.style.filter = "saturate(0.8) brightness(0.9)";
-                statusText.innerText = "STATUS: COOLING...";
+                statusText.innerText = "STATUS: CLEARING...";
             }
         }
 
