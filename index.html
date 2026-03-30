@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>水鏡廊苑 - Visual Cooling Experience</title>
+    <title>水之廳 - Visual Cooling Experience</title>
     <style>
         :root {
             --metal-silver: #d1d1d1;
             --water-deep: #0a0f14;
             --zen-white: #f5f5f5;
+            --glass-bg: rgba(255, 255, 255, 0.12);
         }
 
         body, html {
@@ -18,7 +19,7 @@
             height: 100%;
             overflow: hidden;
             background-color: var(--water-deep);
-            font-family: 'Times New Roman', serif;
+            font-family: 'Times New Roman', "PingFang TC", "Microsoft JhengHei", serif;
         }
 
         /* 空間背景層 */
@@ -52,22 +53,17 @@
             cursor: pointer;
         }
 
-        /* 新增：正中央的主角色 char.png */
+        /* 角色 A: 中央主角色 (char.png) */
         #char-center-wrap {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 140px; /* Q 版尺寸 */
+            width: 140px;
             filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
             animation: breathAnime 4s ease-in-out infinite;
         }
 
-        @keyframes breathAnime {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
-            50% { transform: translate(-50%, -55%) scale(1.05); opacity: 1; }
-        }
-
-        /* 方案 A: 泡泡角色 */
+        /* 角色 B: 泡泡角色 (charbubble.png) */
         #char-bubble-wrap {
             bottom: 25%;
             left: 10%;
@@ -75,12 +71,7 @@
             animation: floatBubble 5s ease-in-out infinite;
         }
 
-        @keyframes floatBubble {
-            0%, 100% { transform: translateY(0) rotate(-1deg); }
-            50% { transform: translateY(-20px) rotate(1deg); }
-        }
-
-        /* 方案 B: 水面角色 */
+        /* 角色 C: 水面角色 (charfloor.png) */
         #char-floor-wrap {
             bottom: 12%;
             right: 15%;
@@ -91,25 +82,71 @@
             animation: waterSway 8s ease-in-out infinite;
         }
 
-        .char-main {
-            width: 100%;
-            position: relative;
-            z-index: 2;
-            -webkit-mask-image: linear-gradient(to bottom, black 85%, rgba(0,0,0,0.5) 100%);
-            mask-image: linear-gradient(to bottom, black 85%, rgba(0,0,0,0.5) 100%);
+        @keyframes breathAnime {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+            50% { transform: translate(-50%, -55%) scale(1.05); opacity: 1; }
         }
 
-        .char-reflection {
-            width: 100%;
-            transform: scaleY(-0.8) translateY(-10px);
-            filter: blur(4px) brightness(0.5) opacity(0.4);
-            margin-top: -5px;
-            z-index: 1;
+        @keyframes floatBubble {
+            0%, 100% { transform: translateY(0) rotate(-1deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
         }
 
         @keyframes waterSway {
             0%, 100% { transform: translateX(0) rotate(0.5deg); }
             50% { transform: translateX(5px) rotate(-0.5deg); }
+        }
+
+        .char-main { width: 100%; position: relative; z-index: 2; -webkit-mask-image: linear-gradient(to bottom, black 85%, rgba(0,0,0,0.5) 100%); mask-image: linear-gradient(to bottom, black 85%, rgba(0,0,0,0.5) 100%); }
+        .char-reflection { width: 100%; transform: scaleY(-0.8) translateY(-10px); filter: blur(4px) brightness(0.5) opacity(0.4); margin-top: -5px; z-index: 1; }
+
+        /* 對話框樣式 (修改後：增加關閉按鈕，取消自動消失) */
+        .dialogue-bubble {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--metal-silver);
+            padding: 12px 35px 12px 18px; /* 右側留空間給叉叉 */
+            border-radius: 6px;
+            font-size: 15px;
+            letter-spacing: 1px;
+            pointer-events: auto; /* 必須設為 auto 才能點擊叉叉 */
+            z-index: 100;
+            white-space: nowrap;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            animation: dialoguePopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        @keyframes dialoguePopIn {
+            0% { opacity: 0; transform: translate(-50%, 20px) scale(0.8); }
+            100% { opacity: 1; transform: translate(-50%, -40px) scale(1); }
+        }
+
+        /* 關閉按鈕 (叉叉) */
+        .close-btn {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-family: Arial, sans-serif;
+            color: var(--metal-silver);
+            opacity: 0.5;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.2);
         }
 
         /* 水波紋畫布層 */
@@ -118,10 +155,9 @@
             top: 0;
             left: 0;
             z-index: 2;
-            cursor: crosshair;
         }
 
-        /* UI 界面層 */
+        /* UI 層 */
         #ui-layer {
             position: absolute;
             top: 0;
@@ -137,62 +173,22 @@
             box-sizing: border-box;
         }
 
-        .header {
-            border-left: 1px solid var(--metal-silver);
-            padding-left: 15px;
-            color: var(--metal-silver);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            font-size: 14px;
-            pointer-events: auto;
-        }
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--metal-silver);
-            font-size: 12px;
-            letter-spacing: 2px;
-        }
-
-        .cool-down-btn {
-            pointer-events: auto;
-            border: 1px solid var(--metal-silver);
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--metal-silver);
-            padding: 10px 25px;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-            transition: all 0.5s;
-        }
-
-        .cool-down-btn:hover {
-            background: var(--metal-silver);
-            color: var(--water-deep);
-        }
+        .header { border-left: 1px solid var(--metal-silver); padding-left: 15px; color: var(--metal-silver); letter-spacing: 4px; text-transform: uppercase; font-size: 14px; pointer-events: auto; }
+        .footer { display: flex; justify-content: space-between; align-items: center; color: var(--metal-silver); font-size: 12px; letter-spacing: 2px; }
+        .cool-down-btn { pointer-events: auto; border: 1px solid var(--metal-silver); background: rgba(255, 255, 255, 0.05); color: var(--metal-silver); padding: 10px 25px; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.5s; }
+        .cool-down-btn:hover { background: var(--metal-silver); color: var(--water-deep); }
     </style>
 </head>
 <body>
 
     <div id="space-background"></div>
-    
     <canvas id="ripple-canvas"></canvas>
 
     <div id="character-layer">
-        <!-- 中央主角色 (char.png) -->
-        <div id="char-center-wrap" class="character-container">
-            <img src="char.png" alt="Center Sprite" style="width:100%">
-        </div>
-
-        <!-- 方案 A (charbubble.png) -->
-        <div id="char-bubble-wrap" class="character-container">
-            <img src="charbubble.png" alt="Bubble Sprite" style="width:100%">
-        </div>
-
-        <!-- 方案 B (charfloor.png) -->
+        <div id="char-center-wrap" class="character-container"><img src="char.png" alt="Center" style="width:100%"></div>
+        <div id="char-bubble-wrap" class="character-container"><img src="charbubble.png" alt="Bubble" style="width:100%"></div>
         <div id="char-floor-wrap" class="character-container">
-            <img src="charfloor.png" class="char-main" alt="Floor Sprite">
+            <img src="charfloor.png" class="char-main" alt="Floor">
             <img src="charfloor.png" class="char-reflection" alt="Reflection">
         </div>
     </div>
@@ -202,7 +198,6 @@
             <div>L'ÉCHELLE DE LA SÉRÉNITÉ</div>
             <div style="font-size: 10px; opacity: 0.6;">ZENITH FRENCH MODERNISM</div>
         </div>
-
         <div class="footer">
             <div id="status">STATUS: COOLING...</div>
             <button class="cool-down-btn" onclick="toggleCooling()">DEEP MEDITATION</button>
@@ -215,9 +210,16 @@
         const bg = document.getElementById('space-background');
         const statusText = document.getElementById('status');
         
-        const centerChar = document.getElementById('char-center-wrap');
-        const bubbleChar = document.getElementById('char-bubble-wrap');
-        const floorChar = document.getElementById('char-floor-wrap');
+        // 詞語庫 (未來可擴充至 20 句以上)
+        const phrases = [
+            "即慧之時定在慧，即定之時慧在定。",
+            "法性寂然為止，寂而常照為觀，止如明鏡止水，觀如影現萬象，故止與觀者，不二一體也。",
+            "心隨萬境轉，轉處實能幽，隨流認得性，無喜亦無憂。",
+            "前念不生即心，後念不滅即佛；成一切相即心，離一切相即佛。",
+            "靜慮能生智，定復從智生，佛果大菩提，定慧為根本。",
+            "猿抱兒歸青嶂後，鳥啣花落碧巖前。",
+            "覺光常在"
+        ];
 
         let width, height;
         let ripples = [];
@@ -227,20 +229,46 @@
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
         }
-
         window.addEventListener('resize', init);
         init();
 
+        // 建立對話框功能 (手動關閉版)
+        function createDialogue(x, y) {
+            const bubble = document.createElement('div');
+            bubble.className = 'dialogue-bubble';
+            
+            const randomText = phrases[Math.floor(Math.random() * phrases.length)];
+            
+            // 插入文字內容與關閉按鈕
+            bubble.innerHTML = `
+                <span>${randomText}</span>
+                <div class="close-btn">×</div>
+            `;
+            
+            // 初始定位
+            bubble.style.left = `${x}px`;
+            bubble.style.top = `${y}px`;
+            
+            // 點擊叉叉的事件處理
+            const closeBtn = bubble.querySelector('.close-btn');
+            closeBtn.onclick = (e) => {
+                e.stopPropagation(); // 阻止點擊叉叉時又觸發背景水波
+                bubble.style.opacity = '0';
+                bubble.style.transform = 'translate(-50%, -20px) scale(0.8)';
+                setTimeout(() => bubble.remove(), 300);
+            };
+
+            // 阻止點擊對話框本身觸發背景水波 (如果你想點框框不產生水波的話)
+            bubble.onmousedown = (e) => e.stopPropagation();
+
+            document.body.appendChild(bubble);
+        }
+
         class Ripple {
             constructor(x, y, size = 150) {
-                this.x = x;
-                this.y = y;
-                this.radius = 0;
-                this.maxRadius = size;
-                this.opacity = 0.5;
-                this.speed = 1.5;
+                this.x = x; this.y = y; this.radius = 0;
+                this.maxRadius = size; this.opacity = 0.5; this.speed = 1.5;
             }
-
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
@@ -249,65 +277,51 @@
                 ctx.stroke();
                 ctx.closePath();
             }
-
-            update() {
-                this.radius += this.speed;
-                this.opacity -= 0.005;
-            }
+            update() { this.radius += this.speed; this.opacity -= 0.005; }
         }
 
         function animate() {
             ctx.clearRect(0, 0, width, height);
             ripples = ripples.filter(r => r.opacity > 0);
-            ripples.forEach(r => {
-                r.update();
-                r.draw();
-            });
+            ripples.forEach(r => { r.update(); r.draw(); });
             requestAnimationFrame(animate);
         }
 
-        // 畫布背景點擊
+        // 畫布背景點擊產生的水波 (普通波紋)
         window.addEventListener('mousedown', (e) => {
+            // 如果點到的是 UI 或 角色，不觸發背景波紋
+            if(e.target.tagName === 'BUTTON' || e.target.closest('.character-container') || e.target.closest('.dialogue-bubble')) return;
             ripples.push(new Ripple(e.clientX, e.clientY));
         });
 
-        // 點擊中央角色 (char.png)：產生向外擴散的大型漣漪
-        centerChar.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // 產生多重強力波紋
-            for(let i=0; i<5; i++) {
-                setTimeout(() => {
-                    ripples.push(new Ripple(window.innerWidth/2, window.innerHeight/2, 300));
-                }, i * 100);
-            }
-        });
+        // 角色點擊事件整合
+        document.querySelectorAll('.character-container').forEach(char => {
+            char.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                const rect = char.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
 
-        // 點擊泡泡角色 (charbubble.png)
-        bubbleChar.addEventListener('click', (e) => {
-            e.stopPropagation();
-            bubbleChar.style.transition = 'transform 0.3s ease-out';
-            bubbleChar.style.transform = 'translateY(-80px) scale(1.1)';
-            
-            for(let i=0; i<2; i++) {
-                setTimeout(() => {
-                    ripples.push(new Ripple(e.clientX, e.clientY, 120));
-                }, i * 200);
-            }
+                // 產生水波
+                ripples.push(new Ripple(centerX, centerY, 200));
 
-            setTimeout(() => {
-                bubbleChar.style.transform = 'translateY(0) scale(1)';
-            }, 600);
-        });
+                // 觸發對話框
+                createDialogue(centerX, rect.top);
 
-        // 點擊地面角色 (charfloor.png)
-        floorChar.addEventListener('click', (e) => {
-            e.stopPropagation();
-            bg.style.filter = "saturate(0.2) brightness(0.7) contrast(1.1)";
-            ripples.push(new Ripple(e.clientX, e.clientY, 180));
-            
-            setTimeout(() => {
-                bg.style.filter = isDeep ? "saturate(0) brightness(0.6)" : "saturate(0.8) brightness(0.9)";
-            }, 1000);
+                // 角色動態反饋
+                if(char.id === 'char-bubble-wrap') {
+                    char.style.transition = 'transform 0.3s ease-out';
+                    char.style.transform = 'translateY(-50px) scale(1.1)';
+                    setTimeout(() => char.style.transform = '', 600);
+                }
+                if(char.id === 'char-floor-wrap') {
+                    bg.style.filter = "saturate(0.2) brightness(0.7)";
+                    setTimeout(() => {
+                        bg.style.filter = isDeep ? "saturate(0) brightness(0.6)" : "saturate(0.8) brightness(0.9)";
+                    }, 800);
+                }
+            });
         });
 
         function toggleCooling() {
