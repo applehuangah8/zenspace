@@ -25,7 +25,7 @@
             transition: filter 2s ease; z-index: 1;
         }
 
-        /* 角色與對話框容器 */
+        /* 角色圖層 */
         #character-layer {
             position: absolute; width: 100%; height: 100%;
             top: 0; left: 0; pointer-events: none; z-index: 5;
@@ -33,17 +33,13 @@
 
         .character-container {
             position: absolute; pointer-events: auto; cursor: pointer;
+            transition: transform 0.2s;
         }
 
-        /* 角色位置 */
-        #char-center-wrap { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; z-index: 6; }
-        #char-bubble-wrap { bottom: 25%; left: 10%; width: 150px; z-index: 6; }
-        #char-floor-wrap { bottom: 12%; right: 15%; width: 140px; display: flex; flex-direction: column; align-items: center; z-index: 6; }
-
-        /* 動畫 */
-        #char-center-wrap { animation: breath 4s ease-in-out infinite; }
-        #char-bubble-wrap { animation: float 5s ease-in-out infinite; }
-        #char-floor-wrap { animation: sway 8s ease-in-out infinite; }
+        /* 角色位置與動畫 */
+        #char-center-wrap { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; z-index: 6; animation: breath 4s ease-in-out infinite; }
+        #char-bubble-wrap { bottom: 25%; left: 10%; width: 150px; z-index: 6; animation: float 5s ease-in-out infinite; }
+        #char-floor-wrap { bottom: 12%; right: 15%; width: 140px; display: flex; flex-direction: column; align-items: center; z-index: 6; animation: sway 8s ease-in-out infinite; }
 
         @keyframes breath { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -55%) scale(1.05); } }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
@@ -52,7 +48,7 @@
         .char-main { width: 100%; -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); }
         .char-reflection { width: 100%; transform: scaleY(-0.8) translateY(-10px); filter: blur(4px) opacity(0.3); margin-top: -5px; }
 
-        /* --- 對話框樣式 --- */
+        /* --- 修改後：對話框樣式 (增加可移動手勢) --- */
         .dialogue-bubble {
             position: absolute;
             background: var(--glass-bg);
@@ -63,24 +59,29 @@
             padding: 12px 40px 12px 18px;
             border-radius: 8px;
             font-size: 16px;
-            pointer-events: auto; /* 重要：讓叉叉可點 */
-            z-index: 1000; /* 確保在最上面 */
+            pointer-events: auto;
+            z-index: 1000;
             white-space: nowrap;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: popIn 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards;
+            cursor: move; /* 提示使用者可以移動 */
+            user-select: none; /* 防止移動時選取到文字 */
+            touch-action: none; /* 防止手機瀏覽器拖動時頁面滾動 */
+            /* 初始動畫 */
+            animation: popIn 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards;
         }
 
         @keyframes popIn {
-            0% { opacity: 0; transform: translate(-50%, 20px) scale(0.5); }
-            100% { opacity: 1; transform: translate(-50%, -50px) scale(1); }
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         .close-btn {
             position: absolute; top: 0; right: 0; width: 35px; height: 100%;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; font-size: 20px; color: #fff; opacity: 0.6;
+            pointer-events: auto;
         }
-        .close-btn:hover { opacity: 1; }
+        .close-btn:hover { opacity: 1; color: #ff8888; }
 
         #ripple-canvas { position: absolute; top: 0; left: 0; z-index: 2; pointer-events: none; }
 
@@ -143,16 +144,55 @@
         window.addEventListener('resize', init);
         init();
 
-        // 核心對話框函式
+        // --- 拖拽功能邏輯 ---
+        function makeDraggable(el) {
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            el.addEventListener('pointerdown', (e) => {
+                // 如果點到的是叉叉，不觸發拖拽
+                if (e.target.classList.contains('close-btn')) return;
+
+                isDragging = true;
+                el.style.zIndex = 2000; // 拖動時置頂
+                
+                // 紀錄初始位置
+                startX = e.clientX;
+                startY = e.clientY;
+                initialLeft = el.offsetLeft;
+                initialTop = el.offsetTop;
+
+                el.setPointerCapture(e.pointerId); // 鎖定指針
+                e.stopPropagation();
+            });
+
+            el.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                el.style.left = `${initialLeft + dx}px`;
+                el.style.top = `${initialTop + dy}px`;
+            });
+
+            el.addEventListener('pointerup', (e) => {
+                isDragging = false;
+                el.releasePointerCapture(e.pointerId);
+                el.style.zIndex = 1000;
+            });
+        }
+
+        // 建立對話框函式
         function createDialogue(x, y) {
             const bubble = document.createElement('div');
             bubble.className = 'dialogue-bubble';
             const text = phrases[Math.floor(Math.random() * phrases.length)];
             bubble.innerHTML = `<span>${text}</span><div class="close-btn">×</div>`;
             
-            // 位置設定
-            bubble.style.left = x + "px";
-            bubble.style.top = y + "px";
+            // 初始生成位置（稍作調整避免重疊）
+            bubble.style.left = (x - 50) + "px";
+            bubble.style.top = (y - 80) + "px";
 
             // 關閉邏輯
             bubble.querySelector('.close-btn').onclick = (e) => {
@@ -162,6 +202,9 @@
             };
 
             document.body.appendChild(bubble);
+            
+            // 使其可拖拽
+            makeDraggable(bubble);
         }
 
         class Ripple {
@@ -185,13 +228,13 @@
             requestAnimationFrame(animate);
         }
 
-        // 背景點擊產生波紋 (修正偵測：不點到 UI 或 角色才產生)
+        // 背景點擊
         window.addEventListener('pointerdown', (e) => {
             if (e.target.closest('.character-container') || e.target.closest('.dialogue-bubble') || e.target.tagName === 'BUTTON') return;
             ripples.push(new Ripple(e.clientX, e.clientY));
         });
 
-        // 角色點擊偵測
+        // 角色點擊
         document.querySelectorAll('.character-container').forEach(char => {
             char.addEventListener('pointerdown', (e) => {
                 e.stopPropagation();
@@ -199,11 +242,9 @@
                 const cx = rect.left + rect.width / 2;
                 const cy = rect.top + rect.height / 2;
 
-                // 產生波紋與對話框
                 ripples.push(new Ripple(cx, cy, 250));
                 createDialogue(cx, rect.top);
 
-                // 角色縮放反饋
                 char.style.transform = "scale(0.9)";
                 setTimeout(() => char.style.transform = "", 200);
             });
