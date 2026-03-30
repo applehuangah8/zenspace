@@ -52,11 +52,26 @@
             cursor: pointer;
         }
 
+        /* 新增：正中央的主角色 char.png */
+        #char-center-wrap {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px; /* Q 版尺寸 */
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
+            animation: breathAnime 4s ease-in-out infinite;
+        }
+
+        @keyframes breathAnime {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+            50% { transform: translate(-50%, -55%) scale(1.05); opacity: 1; }
+        }
+
         /* 方案 A: 泡泡角色 */
         #char-bubble-wrap {
             bottom: 25%;
-            left: 15%;
-            width: 180px;
+            left: 10%;
+            width: 150px;
             animation: floatBubble 5s ease-in-out infinite;
         }
 
@@ -68,8 +83,8 @@
         /* 方案 B: 水面角色 */
         #char-floor-wrap {
             bottom: 12%;
-            right: 18%;
-            width: 160px;
+            right: 15%;
+            width: 140px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -102,7 +117,7 @@
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 2; /* 放在背景之上，UI 之下 */
+            z-index: 2;
             cursor: crosshair;
         }
 
@@ -165,12 +180,17 @@
     <canvas id="ripple-canvas"></canvas>
 
     <div id="character-layer">
-        <!-- 方案 A -->
+        <!-- 中央主角色 (char.png) -->
+        <div id="char-center-wrap" class="character-container">
+            <img src="char.png" alt="Center Sprite" style="width:100%">
+        </div>
+
+        <!-- 方案 A (charbubble.png) -->
         <div id="char-bubble-wrap" class="character-container">
             <img src="charbubble.png" alt="Bubble Sprite" style="width:100%">
         </div>
 
-        <!-- 方案 B -->
+        <!-- 方案 B (charfloor.png) -->
         <div id="char-floor-wrap" class="character-container">
             <img src="charfloor.png" class="char-main" alt="Floor Sprite">
             <img src="charfloor.png" class="char-reflection" alt="Reflection">
@@ -194,6 +214,8 @@
         const ctx = canvas.getContext('2d');
         const bg = document.getElementById('space-background');
         const statusText = document.getElementById('status');
+        
+        const centerChar = document.getElementById('char-center-wrap');
         const bubbleChar = document.getElementById('char-bubble-wrap');
         const floorChar = document.getElementById('char-floor-wrap');
 
@@ -210,11 +232,11 @@
         init();
 
         class Ripple {
-            constructor(x, y) {
+            constructor(x, y, size = 150) {
                 this.x = x;
                 this.y = y;
                 this.radius = 0;
-                this.maxRadius = 150;
+                this.maxRadius = size;
                 this.opacity = 0.5;
                 this.speed = 1.5;
             }
@@ -244,20 +266,31 @@
             requestAnimationFrame(animate);
         }
 
-        // 畫布點擊產生波紋
+        // 畫布背景點擊
         window.addEventListener('mousedown', (e) => {
             ripples.push(new Ripple(e.clientX, e.clientY));
         });
 
-        // 點擊角色 A (向上彈跳)
-        bubbleChar.addEventListener('click', (e) => {
-            e.stopPropagation(); // 防止觸發畫布的點擊
-            bubbleChar.style.transition = 'transform 0.3s ease-out';
-            bubbleChar.style.transform = 'translateY(-100px) scale(1.1)';
-            
-            for(let i=0; i<3; i++) {
+        // 點擊中央角色 (char.png)：產生向外擴散的大型漣漪
+        centerChar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // 產生多重強力波紋
+            for(let i=0; i<5; i++) {
                 setTimeout(() => {
-                    ripples.push(new Ripple(e.clientX, e.clientY));
+                    ripples.push(new Ripple(window.innerWidth/2, window.innerHeight/2, 300));
+                }, i * 100);
+            }
+        });
+
+        // 點擊泡泡角色 (charbubble.png)
+        bubbleChar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            bubbleChar.style.transition = 'transform 0.3s ease-out';
+            bubbleChar.style.transform = 'translateY(-80px) scale(1.1)';
+            
+            for(let i=0; i<2; i++) {
+                setTimeout(() => {
+                    ripples.push(new Ripple(e.clientX, e.clientY, 120));
                 }, i * 200);
             }
 
@@ -266,18 +299,17 @@
             }, 600);
         });
 
-        // 點擊角色 B (畫面變冷)
+        // 點擊地面角色 (charfloor.png)
         floorChar.addEventListener('click', (e) => {
             e.stopPropagation();
             bg.style.filter = "saturate(0.2) brightness(0.7) contrast(1.1)";
-            ripples.push(new Ripple(e.clientX, e.clientY));
+            ripples.push(new Ripple(e.clientX, e.clientY, 180));
             
             setTimeout(() => {
                 bg.style.filter = isDeep ? "saturate(0) brightness(0.6)" : "saturate(0.8) brightness(0.9)";
             }, 1000);
         });
 
-        // 降溫按鈕功能
         function toggleCooling() {
             if(!isDeep) {
                 bg.style.filter = "saturate(0) brightness(0.6) hue-rotate(10deg)";
